@@ -1,0 +1,68 @@
+@using System.Xml.Linq
+@model Book
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+@functions {
+    // Заголовок пункта оглавления: дочерний <title>, иначе имя элемента.
+    static string TocItemTitle(XElement element) =>
+        (string?)element.Element("title") ?? element.Name.LocalName;
+}
+
+@{
+    void RenderToc(XElement parent)
+    {
+        <ul>
+            @foreach (var item in parent.Elements().Where(e => e.Name != "title"))
+            {
+                <li>
+                    @TocItemTitle(item)
+                    @if (item.Attribute("page") is { } pageNumber)
+                    {
+                        <span class="toc-page">@pageNumber.Value</span>
+                    }
+                    @if (item.Elements().Any(e => e.Name != "title"))
+                    {
+                        RenderToc(item);
+                    }
+                </li>
+            }
+        </ul>
+    }
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">@Model.Title</h1>
+    <a asp-action="Index">← К списку</a>
+</div>
+
+<dl class="row mb-4">
+    <dt class="col-sm-3">Автор</dt>        <dd class="col-sm-9">@Model.Author</dd>
+    <dt class="col-sm-3">Год издания</dt>  <dd class="col-sm-9">@(Model.PublishYear?.ToString() ?? "-")</dd>
+    <dt class="col-sm-3">Издательство</dt> <dd class="col-sm-9">@(Model.Publisher ?? "-")</dd>
+    <dt class="col-sm-3">ISBN</dt>         <dd class="col-sm-9">@(Model.Isbn ?? "-")</dd>
+    <dt class="col-sm-3">Жанр</dt>         <dd class="col-sm-9">@(Model.Genre ?? "-")</dd>
+    <dt class="col-sm-3">Страниц</dt>      <dd class="col-sm-9">@(Model.PageCount?.ToString() ?? "-")</dd>
+    <dt class="col-sm-3">Заметки</dt>      <dd class="col-sm-9 text-prewrap">@(Model.Notes ?? "-")</dd>
+</dl>
+
+<h2 class="h5">Оглавление</h2>
+<div class="toc-tree mb-4">
+    @if (Model.TableOfContents is null)
+    {
+        <p class="text-muted">Оглавление не заполнено.</p>
+    }
+    else
+    {
+        RenderToc(XElement.Parse(Model.TableOfContents));
+    }
+</div>
+
+<div class="d-flex gap-2">
+    <a class="btn btn-primary" asp-action="Edit" asp-route-id="@Model.Id">Изменить</a>
+    <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="ms-auto"
+          onsubmit="return confirm('Удалить книгу?')">
+        <button type="submit" class="btn btn-outline-danger">Удалить</button>
+    </form>
+</div>

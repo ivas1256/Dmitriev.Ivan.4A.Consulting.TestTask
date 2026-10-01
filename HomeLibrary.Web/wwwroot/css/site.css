@@ -1,0 +1,39 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.text-prewrap {
+  white-space: pre-wrap;
+}
+
+/* Оглавление на странице просмотра */
+.toc-tree ul {
+  list-style: none;
+  padding-left: 1.25rem;
+  margin: 0;
+}
+
+.toc-tree > ul {
+  padding-left: 0;
+}
+
+.toc-tree li {
+  padding: 0.15rem 0;
+}
+
+.toc-tree .toc-page {
+  float: right;
+  color: var(--bs-secondary-color);
+}
+
+/* XML-редактор */
+.toc-editor {
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+}

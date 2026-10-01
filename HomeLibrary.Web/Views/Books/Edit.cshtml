@@ -1,0 +1,90 @@
+@model BookEditModel
+@{
+    var bookId = (int?)ViewData["BookId"];
+    ViewData["Title"] = bookId is null ? "Новая книга" : "Изменение книги";
+}
+
+<h1 class="h3 mb-3">@ViewData["Title"]</h1>
+
+<form asp-action="@(bookId is null ? "Create" : "Edit")" asp-route-id="@bookId" method="post" id="book-form">
+    <div class="row g-3 mb-3">
+        <div class="col-md-8">
+            <label asp-for="Title" class="form-label"></label> *
+            <input asp-for="Title" class="form-control" required maxlength="300" />
+        </div>
+        <div class="col-md-4">
+            <label asp-for="Author" class="form-label"></label> *
+            <input asp-for="Author" class="form-control" required maxlength="200" />
+        </div>
+        <div class="col-md-2">
+            <label asp-for="PublishYear" class="form-label"></label>
+            <input asp-for="PublishYear" class="form-control" min="1450" max="@DateTime.Today.Year" />
+        </div>
+        <div class="col-md-4">
+            <label asp-for="Publisher" class="form-label"></label>
+            <input asp-for="Publisher" class="form-control" maxlength="200" />
+        </div>
+        <div class="col-md-2">
+            <label asp-for="Isbn" class="form-label"></label>
+            <input asp-for="Isbn" class="form-control" maxlength="20" />
+        </div>
+        <div class="col-md-2">
+            <label asp-for="Genre" class="form-label"></label>
+            <input asp-for="Genre" class="form-control" maxlength="100" />
+        </div>
+        <div class="col-md-2">
+            <label asp-for="PageCount" class="form-label"></label>
+            <input asp-for="PageCount" class="form-control" min="1" />
+        </div>
+        <div class="col-12">
+            <label asp-for="Notes" class="form-label"></label>
+            <textarea asp-for="Notes" class="form-control" rows="2"></textarea>
+        </div>
+        <div class="col-12">
+            <label asp-for="TableOfContents" class="form-label mb-0"></label>
+            <div class="form-text mt-0 mb-1">
+                Корневой элемент - <code>&lt;toc&gt;</code>; главы - <code>&lt;chapter&gt;</code>,
+                разделы - <code>&lt;section&gt;</code>, заголовок - <code>&lt;title&gt;</code>,
+                необязательный атрибут <code>page</code>.
+            </div>
+            <textarea asp-for="TableOfContents" class="form-control font-monospace" rows="15"></textarea>
+            <div id="toc-editor" class="toc-editor d-none"></div>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Сохранить</button>
+    @if (bookId is null)
+    {
+        <a class="btn btn-outline-secondary" asp-action="Index">Отмена</a>
+    }
+    else
+    {
+        <a class="btn btn-outline-secondary" asp-action="Details" asp-route-id="@bookId">Отмена</a>
+    }
+</form>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.44.0/ace.min.js"></script>
+    <script>
+        // Ace показывается вместо textarea; перед отправкой формы текст копируется обратно.
+        $(function () {
+            var $textarea = $('#TableOfContents').addClass('d-none');
+            $('#toc-editor').removeClass('d-none');
+
+            ace.config.set('basePath', 'https://cdnjs.cloudflare.com/ajax/libs/ace/1.44.0/');
+            var editor = ace.edit('toc-editor', {
+                mode: 'ace/mode/xml',
+                value: $textarea.val(),
+                tabSize: 2,
+                useSoftTabs: true,
+                showPrintMargin: false,
+                minLines: 15,
+                maxLines: 40
+            });
+
+            $('#book-form').on('submit', function () {
+                $textarea.val(editor.getValue());
+            });
+        });
+    </script>
+}
